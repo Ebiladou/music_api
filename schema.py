@@ -5,6 +5,14 @@ class User(BaseModel):
     email: str
     password: str
 
+class UserResponse(BaseModel):
+    email: str
+    username: str
+    id: int
+
+class UserInDB(User):
+    hashed_password: str
+
 class Login_user (BaseModel):
     email : str
     password: str
@@ -12,7 +20,6 @@ class Login_user (BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
-
 
 class TokenData(BaseModel):
     username: str | None = None
