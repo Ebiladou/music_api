@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class User(BaseModel):
     username: str
@@ -23,3 +24,15 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+class Playlist(BaseModel):
+    name: str
+    description: str | None = None
+    is_public: bool | None = None
+    user_id: int | None = None
+
+class PlaylistResponse(BaseModel):
+    name: str
+    description: str
+    created_by: str
+    created_at: datetime 

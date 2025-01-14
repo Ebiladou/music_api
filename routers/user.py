@@ -8,7 +8,7 @@ from typing import List
 router = APIRouter()
 
 @router.get("/users", response_model=List[UserResponse])
-def get_users(current_user: UserResponse = Depends(verify_token)):
+def get_users(current_user: User = Depends(verify_token)):
     cursor.execute(" SELECT * FROM users ")
     user_details = cursor.fetchall()
     users = [
@@ -54,7 +54,7 @@ def getone_user(user_id: int, current_user: User = Depends(verify_token)):
     cursor.execute(" SELECT * FROM users WHERE id = %s ", [user_id], binary=True)
     single_user = cursor.fetchone()
 
-    if single_user == None:
+    if single_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
     user = {"email": single_user[0], "username": single_user[1], "id": single_user[3]}
