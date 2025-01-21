@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Response, status, HTTPException, Depends
 from database import cursor, conn
 from oauth import verify_token 
-from schema import Playlist, User, PlaylistResponse
+from schema import Playlist, User, PlaylistResponse, UpdatedResponse
 from typing import List
 
 router = APIRouter()
@@ -29,31 +29,36 @@ def get_playlists(current_user: User = Depends(verify_token)):
     ] 
     return result 
 
-router.put("/playlists/{id}", response_model=PlaylistResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.put("/playlists/{id}", response_model=UpdatedResponse, status_code=status.HTTP_202_ACCEPTED)
 def update_playlist(id: int, playlist: Playlist, current_user: User = Depends(verify_token)):
-    cursor.execute("UPDATE playlists SET name = %s, description = %s, is_public = %s WHERE id = %s RETURNING *", (playlist.name, playlist.description, playlist.is_public, str(id)))
+    cursor.execute("UPDATE playlists SET name = %s, description = %s, is_public = %s WHERE id = %s RETURNING *", (playlist.name, playlist.description, playlist.is_public, id))
     updated_playlist = cursor.fetchone()
     conn.commit()
     if updated_playlist is None:
         raise HTTPException(status_code=404, detail="Playlist not found")
     result = {
-        "name": updated_playlist[0],
-        "description": updated_playlist[1],
-        "created_at": updated_playlist[3],
-        "created_by": updated_playlist[4],
+        "id": updated_playlist[0],
+        "name": updated_playlist[1],
+        "description": updated_playlist[2],
+        "updated_at": updated_playlist[6],
     }
+
     return result
 
-router.get("/playlists/{playlist_id}", response_model=PlaylistResponse)
-def get_playlist(playlist_id: int, current_user: User = Depends(verify_token)):
-    cursor.execute("SELECT playlists.id, playlists.name, playlists.description, playlists.is_public, playlists.created_at, users.username AS created_by FROM playlists JOIN users ON playlists.user_id = users.id WHERE playlists.id = %s", [playlist_id], binary=True)
+@router.get("/playlists/{id}", response_model=PlaylistResponse)
+def get_playlist(id: int, current_user: User = Depends(verify_token)):
+    cursor.execute("SELECT playlists.id, playlists.name, playlists.description, playlists.is_public, playlists.created_at, users.username AS created_by FROM playlists JOIN users ON playlists.user_id = users.id WHERE playlists.id = %s", (id,))
     playlist = cursor.fetchone()
+
+    print(playlist)
+    
     if playlist is None:
         raise HTTPException(status_code=404, detail="Playlist not found")
     result = {
-        "name": playlist[0],
-        "description": playlist[1],
-        "created_at": playlist[3],
-        "created_by": playlist[4],
+        "name": playlist[1],
+        "description": playlist[2],
+        "created_at": playlist[4],
+        "created_by": playlist[5],
     }
+
     return result

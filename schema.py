@@ -36,3 +36,9 @@ class PlaylistResponse(BaseModel):
     description: str
     created_by: str
     created_at: datetime 
+
+class UpdatedResponse (BaseModel):
+    id: int
+    name: str
+    description: str
+    updated_at: datetime 
