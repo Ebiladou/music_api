@@ -49,8 +49,6 @@ def update_playlist(id: int, playlist: Playlist, current_user: User = Depends(ve
 def get_playlist(id: int, current_user: User = Depends(verify_token)):
     cursor.execute("SELECT playlists.id, playlists.name, playlists.description, playlists.is_public, playlists.created_at, users.username AS created_by FROM playlists JOIN users ON playlists.user_id = users.id WHERE playlists.id = %s", (id,))
     playlist = cursor.fetchone()
-
-    print(playlist)
     
     if playlist is None:
         raise HTTPException(status_code=404, detail="Playlist not found")
