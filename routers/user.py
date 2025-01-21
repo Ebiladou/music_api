@@ -12,18 +12,19 @@ def get_users(current_user: User = Depends(verify_token)):
     cursor.execute(" SELECT * FROM users ")
     user_details = cursor.fetchall()
     users = [
-        {"email": row[0], "username": row[1], "id": row[3]}
+        {"email": row['email'], "username": row['username'], "id": row['id']}
         for row in user_details
     ]
     return users
 
-@router.post("/users/register", status_code=status.HTTP_201_CREATED)
+@router.post("/users/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def signup_user(user: User):
     hashed_password = hash_password(user.password)
     cursor.execute (" INSERT INTO users (username, email, password) VALUES (%s, %s, %s) RETURNING * ", (user.username, user.email, hashed_password))
     new_user = cursor.fetchone()
     conn.commit()
-    return {"new user": new_user}
+    result = {"email": new_user['email'], "username": new_user['username'], "id": new_user['id']}
+    return result
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, current_user: User = Depends(verify_token)):
@@ -46,7 +47,7 @@ def update_user(user_id: int, user: User, current_user: User = Depends(verify_to
     if updated_user == None:
         raise HTTPException(status_code=404, detail=f"User {user_id} does not exist")
     
-    user = {"email": updated_user[0], "username": updated_user[1], "id": updated_user[3]}
+    user = {"email": updated_user['email'], "username": updated_user['username'], "id": updated_user['id']}
     return user 
 
 @router.get("/users/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
@@ -57,5 +58,5 @@ def getone_user(user_id: int, current_user: User = Depends(verify_token)):
     if single_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    user = {"email": single_user[0], "username": single_user[1], "id": single_user[3]}
+    user = {"email": single_user['email'], "username": single_user['username'], "id": single_user['id']}
     return user  

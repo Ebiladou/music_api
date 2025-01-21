@@ -12,6 +12,9 @@ while True:
             host=os.getenv("DATABASE_HOST"),
             password=os.getenv("DATABASE_PASSWORD")
         )
+
+        conn.row_factory = psycopg.rows.dict_row
+
         cursor = conn.cursor()
         print('connected successfully')
         break
